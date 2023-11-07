@@ -1,7 +1,25 @@
-import { StyleSheet } from 'react-native'
-import React from 'react'
-import { TextInput,  } from 'react-native-paper'
+import { StyleSheet, TouchableOpacity } from 'react-native'
+import React, { useState} from 'react'
+import { TextInput, } from 'react-native-paper'
+import CountryPicker from 'react-native-country-picker-modal';
 export default function Business({ formData, setFormData }) {
+
+  //for country picker
+  const [country, setCountry] = useState('');
+  const [countryPickerVisible, setCountryPickerVisible] = useState(false);
+
+  const onCountrySelect = (selectedCountry) => {
+    setCountry(selectedCountry);
+    console.log(selectedCountry.name);
+    setCountryPickerVisible(false);
+    setFormData({ ...formData, country:selectedCountry.name });
+  };
+
+  const toggleCountryPicker = () => {
+      setCountryPickerVisible(!countryPickerVisible);
+  };
+  
+  //end
   return (
     <>
       <TextInput style={styles.textInput}
@@ -54,13 +72,30 @@ export default function Business({ formData, setFormData }) {
           setFormData({ ...formData, alternate_contact_number })
         }}
       />
+
+      <TouchableOpacity onPress={toggleCountryPicker}  >
       <TextInput style={styles.textInput}
-        mode="outlined" label='Country'
-        placeholder='Enter country' value={formData.country}
-        onChangeText={(country) => {
-          setFormData({ ...formData, country })
-        }}
-      />
+          mode="outlined" label='Country' editable={false}
+          right={<TextInput.Icon icon="chevron-down" size={15} />}
+        placeholder='Enter country' value={formData.country ? `${formData.country}` : ''}
+        />
+      </TouchableOpacity>
+      {countryPickerVisible && (
+                <CountryPicker
+                    withFilter
+                    withFlag
+                    withCountryNameButton
+                    withAlphaFilter
+                    withCallingCode
+                    withCurrency
+                    withEmoji
+                    onSelect={onCountrySelect}
+                    visible={countryPickerVisible}
+                    onOpen={toggleCountryPicker}
+                    onClose={toggleCountryPicker}
+                />)
+            }
+
       <TextInput style={styles.textInput}
         mode="outlined" label='State'
         placeholder='Enter state' value={formData.state}
