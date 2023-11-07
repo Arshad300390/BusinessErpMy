@@ -1,7 +1,11 @@
-import { StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useState} from 'react'
+import { StyleSheet, TouchableOpacity, Modal, View, Text } from 'react-native'
+import React, { useState , useEffect} from 'react'
 import { TextInput, } from 'react-native-paper'
 import CountryPicker from 'react-native-country-picker-modal';
+import DatePicker from "react-native-modern-datepicker";
+import { getFormatedDate } from "react-native-modern-datepicker";
+
+
 export default function Business({ formData, setFormData }) {
 
   //for country picker
@@ -10,15 +14,37 @@ export default function Business({ formData, setFormData }) {
 
   const onCountrySelect = (selectedCountry) => {
     setCountry(selectedCountry);
-    console.log(selectedCountry.name);
     setCountryPickerVisible(false);
-    setFormData({ ...formData, country:selectedCountry.name });
+    setFormData({ ...formData, country: selectedCountry.name });
   };
 
   const toggleCountryPicker = () => {
-      setCountryPickerVisible(!countryPickerVisible);
+    setCountryPickerVisible(!countryPickerVisible);
   };
-  
+
+  //end
+
+  //date picker
+  const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
+  const today = new Date();
+  const startDate = getFormatedDate(
+    today.setDate(today.getDate() + 1),
+    "YYYY/MM/DD"
+  );
+  const [selectedStartDate, setSelectedStartDate] = useState(formData.start_date || '');
+  const [startedDate, setStartedDate] = useState("12/12/2022");
+
+  function handleChangeStartDate(propDate) {
+    setStartedDate(propDate);
+
+  }
+  useEffect(() => {
+    setFormData({ ...formData, start_date: selectedStartDate });
+  }, [selectedStartDate]);
+
+  const handleOnPressStartDate = () => {
+    setOpenStartDatePicker(!openStartDatePicker);
+  };
   //end
   return (
     <>
@@ -30,13 +56,45 @@ export default function Business({ formData, setFormData }) {
           setFormData({ ...formData, business_name })
         }}
       />
-      <TextInput style={styles.textInput}
-       mode="outlined" label='Start Date'
-        placeholder='Enter Start date' value={formData.start_date}
-        onChangeText={(start_date) => {
-          setFormData({ ...formData, start_date })
-        }}
-      />
+
+      <TouchableOpacity onPress={handleOnPressStartDate}>
+        <TextInput style={styles.textInput}
+          mode="outlined" label='Start Date' editable={false}
+          right={<TextInput.Icon icon="calendar" size={15} />}
+          placeholder='Enter Start date' value={selectedStartDate}
+        />
+      </TouchableOpacity>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={openStartDatePicker}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <DatePicker
+              mode="calendar"
+              minimumDate={startDate}
+              selected={selectedStartDate}
+              onDateChanged={handleChangeStartDate}
+              onSelectedChange={(date) => setSelectedStartDate(date)}
+              options={{
+                backgroundColor: "#080516",
+                textHeaderColor: "#469ab6",
+                textDefaultColor: "#FFFFFF",
+                selectedTextColor: "#FFF",
+                mainColor: "#469ab6",
+                textSecondaryColor: "#FFFFFF",
+                borderColor: "rgba(122, 146, 165, 0.1)",
+              }}
+            />
+
+            <TouchableOpacity onPress={handleOnPressStartDate}>
+              <Text style={{ color: "white" }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <TextInput style={styles.textInput}
         mode="outlined" label='Currency '
         placeholder='currency' value={formData.currency}
@@ -74,27 +132,27 @@ export default function Business({ formData, setFormData }) {
       />
 
       <TouchableOpacity onPress={toggleCountryPicker}  >
-      <TextInput style={styles.textInput}
+        <TextInput style={styles.textInput}
           mode="outlined" label='Country' editable={false}
           right={<TextInput.Icon icon="chevron-down" size={15} />}
-        placeholder='Enter country' value={formData.country ? `${formData.country}` : ''}
+          placeholder='Enter country' value={formData.country ? `${formData.country}` : ''}
         />
       </TouchableOpacity>
       {countryPickerVisible && (
-                <CountryPicker
-                    withFilter
-                    withFlag
-                    withCountryNameButton
-                    withAlphaFilter
-                    withCallingCode
-                    withCurrency
-                    withEmoji
-                    onSelect={onCountrySelect}
-                    visible={countryPickerVisible}
-                    onOpen={toggleCountryPicker}
-                    onClose={toggleCountryPicker}
-                />)
-            }
+        <CountryPicker
+          withFilter
+          withFlag
+          withCountryNameButton
+          withAlphaFilter
+          withCallingCode
+          withCurrency
+          withEmoji
+          onSelect={onCountrySelect}
+          visible={countryPickerVisible}
+          onOpen={toggleCountryPicker}
+          onClose={toggleCountryPicker}
+        />)
+      }
 
       <TextInput style={styles.textInput}
         mode="outlined" label='State'
@@ -141,5 +199,22 @@ const styles = StyleSheet.create({
     height: 30,
     width: 340,
     placeholderColor: 'red',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "#080516",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+    padding: 35,
+    width: "90%",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 })

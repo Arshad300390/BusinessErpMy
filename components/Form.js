@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Pressable, StyleSheet } from 'react-native'
+import { View,  StyleSheet } from 'react-native'
 import { Text, Button } from 'react-native-paper'
 import Business from './Business';
 import BusinessSettings from './BusinessSettings';
